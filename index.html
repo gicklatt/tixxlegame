@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tixxle — Color Match Arcade</title>
+  <meta name="description" content="Tixxle is a fast color-match arcade game. Tap to swap lanes, chain combos, and clear 100 levels across 4 worlds. Atari-era pixel art." />
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
+  <meta property="og:title" content="Tixxle — Color Match Arcade" />
+  <meta property="og:description" content="Tap to swap lanes, chain combos, beat your reflexes." />
+  <meta property="og:image" content="assets/screenshots/01-hero.png" />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#0a0e1f" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0e1f;
+      --panel: #111733;
+      --line: rgba(120, 150, 255, 0.13);
+      --text: #eef1ff;
+      --muted: #8b93b8;
+      --faint: #5a6188;
+      --red: #ff5a5a;
+      --blue: #5ab4ff;
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 26px; }
+    .pixel { font-family: "Press Start 2P", monospace; }
+
+    body::before {
+      content: "";
+      position: fixed; inset: 0; z-index: -1;
+      background:
+        radial-gradient(620px 460px at 84% -6%, rgba(90, 180, 255, 0.16), transparent 70%),
+        radial-gradient(620px 460px at 8% 104%, rgba(255, 90, 90, 0.13), transparent 70%);
+    }
+
+    /* header */
+    header {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(10, 14, 31, 0.78);
+      border-bottom: 1px solid transparent;
+      transition: border-color .3s var(--ease);
+    }
+    header.scrolled { border-bottom-color: var(--line); }
+    .nav { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand img { width: 30px; height: 30px; border-radius: 7px; }
+    .brand .name { font-size: 12px; letter-spacing: 0.04em; }
+    .brand .name .r { color: var(--red); }
+    .brand .name .b { color: var(--blue); }
+    .nav-links { display: flex; gap: 26px; font-size: 14px; color: var(--muted); }
+    .nav-links a { transition: color .2s var(--ease); }
+    .nav-links a:hover { color: var(--text); }
+
+    /* hero */
+    .hero { text-align: center; padding: 92px 0 60px; }
+    .hero .icon {
+      width: 96px; height: 96px; border-radius: 22px; margin-bottom: 26px;
+      box-shadow: 0 0 0 1px var(--line), 0 18px 50px -12px rgba(90, 180, 255, .4);
+    }
+    .hero h1 {
+      font-size: clamp(30px, 7vw, 60px); line-height: 1;
+      letter-spacing: 0.02em;
+    }
+    .hero h1 .r { color: var(--red); text-shadow: 0 0 24px rgba(255, 90, 90, .6); }
+    .hero h1 .b { color: var(--blue); text-shadow: 0 0 24px rgba(90, 180, 255, .6); }
+    .hero .sub {
+      margin-top: 22px; font-size: 15px; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--blue);
+    }
+    .hero p.lead {
+      color: var(--muted); font-size: 17px;
+      max-width: 56ch; margin: 18px auto 30px;
+    }
+    .badges { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .badge {
+      display: inline-block; padding: 11px 22px; border-radius: 10px;
+      font-size: 14px; font-weight: 600;
+      border: 1px solid var(--line); color: var(--faint);
+    }
+
+    /* screenshots */
+    .shots {
+      display: flex; gap: 16px; overflow-x: auto;
+      padding: 14px 26px 44px; scroll-snap-type: x mandatory;
+    }
+    .shots::-webkit-scrollbar { height: 0; }
+    .shots img {
+      height: 410px; border-radius: 18px;
+      border: 1px solid var(--line);
+      box-shadow: 0 20px 44px -18px rgba(0, 0, 0, .8);
+      scroll-snap-align: center; flex: 0 0 auto;
+    }
+
+    /* sections */
+    section.block { padding: 54px 0; border-top: 1px solid var(--line); }
+    .eyebrow {
+      font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--faint);
+    }
+    section.block h2 {
+      font-size: clamp(22px, 3.4vw, 30px); font-weight: 700;
+      margin: 12px 0 28px; letter-spacing: -0.01em;
+    }
+
+    .features { display: grid; gap: 16px; }
+    @media (min-width: 640px) { .features { grid-template-columns: 1fr 1fr; } }
+    .feature {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 15px; padding: 22px;
+      transition: transform .25s var(--ease), border-color .25s var(--ease);
+    }
+    .feature:hover { transform: translateY(-3px); border-color: rgba(120,150,255,.3); }
+    .feature .dot {
+      width: 11px; height: 11px; border-radius: 50%; margin-bottom: 13px;
+    }
+    .feature h3 { font-size: 16px; margin-bottom: 5px; }
+    .feature p { color: var(--muted); font-size: 14.5px; }
+
+    .modes { display: grid; gap: 18px; }
+    @media (min-width: 700px) { .modes { grid-template-columns: 1fr 1fr; } }
+    .mode {
+      position: relative; overflow: hidden;
+      border: 1px solid var(--line); border-radius: 18px;
+      padding: 28px; background: var(--panel);
+    }
+    .mode::before {
+      content: ""; position: absolute; top: -40px; right: -40px;
+      width: 150px; height: 150px; border-radius: 50%;
+      filter: blur(48px); opacity: .5; background: var(--glow);
+    }
+    .mode .tag {
+      position: relative; font-size: 10px; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--accent);
+    }
+    .mode h3 { position: relative; font-size: 21px; margin: 8px 0 10px; }
+    .mode p { position: relative; color: var(--muted); font-size: 14.5px; }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 34px 0 58px; text-align: center;
+      color: var(--muted); font-size: 14px;
+    }
+    footer a { color: var(--blue); }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .hero { padding: 64px 0 44px; }
+      .shots img { height: 340px; }
+    }
+  </style>
+</head>
+<body>
+  <header id="header">
+    <div class="wrap nav">
+      <a class="brand" href="/">
+        <img src="assets/icon.svg" alt="Tixxle icon" />
+        <span class="name pixel">TI<span class="r">X</span><span class="b">X</span>LE</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#modes">Modes</a>
+        <a href="privacy/">Privacy</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <img class="icon" src="assets/icon.svg" alt="Tixxle icon" />
+      <h1 class="pixel">TI<span class="r">X</span><span class="b">X</span>LE</h1>
+      <div class="sub">Tap to swap, chain combos</div>
+      <p class="lead">
+        A fast color-match arcade game. Two characters hold their lanes,
+        colored blocks race in — one tap swaps the lanes. Line up the
+        color, score the match, keep your combo alive.
+      </p>
+      <div class="badges">
+        <span class="badge">App Store &middot; coming soon</span>
+        <span class="badge">Google Play &middot; coming soon</span>
+      </div>
+    </section>
+
+    <div class="shots">
+      <img src="assets/screenshots/01-hero.png" alt="Tixxle gameplay" />
+      <img src="assets/screenshots/02-mechanic.png" alt="Lane-swap mechanic" />
+      <img src="assets/screenshots/03-combo.png" alt="Combo chain" />
+      <img src="assets/screenshots/04-depth.png" alt="Level progression" />
+      <img src="assets/screenshots/05-worlds.png" alt="Four worlds" />
+      <img src="assets/screenshots/06-endless.png" alt="Endless Run mode" />
+    </div>
+
+    <section id="features" class="block wrap">
+      <div class="eyebrow">Inside Tixxle</div>
+      <h2>Built for one thumb, tuned for reflexes</h2>
+      <div class="features">
+        <div class="feature">
+          <div class="dot" style="background:var(--blue);box-shadow:0 0 14px var(--blue);"></div>
+          <h3>Combo chains that bend time</h3>
+          <p>Every milestone in your combo slows the blocks down — reward for nerve, punishment for none.</p>
+        </div>
+        <div class="feature">
+          <div class="dot" style="background:var(--red);box-shadow:0 0 14px var(--red);"></div>
+          <h3>6 collectible characters</h3>
+          <p>Unlock six pixel characters as you clear worlds — each with its own look on the lanes.</p>
+        </div>
+        <div class="feature">
+          <div class="dot" style="background:var(--blue);box-shadow:0 0 14px var(--blue);"></div>
+          <h3>Daily quests</h3>
+          <p>A fresh set of goals every day — a reason to come back and a steady drip of rewards.</p>
+        </div>
+        <div class="feature">
+          <div class="dot" style="background:var(--red);box-shadow:0 0 14px var(--red);"></div>
+          <h3>Atari-era craft</h3>
+          <p>A hand-built retro palette — neon pixels on deep black — and a chiptune soundtrack synthesized note by note.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="modes" class="block wrap">
+      <div class="eyebrow">Two ways to play</div>
+      <h2>Modes</h2>
+      <div class="modes">
+        <div class="mode" style="--accent:var(--blue);--glow:rgba(90,180,255,.5);">
+          <div class="tag">Endless Run</div>
+          <h3>Race the blocks</h3>
+          <p>
+            Chase a high score as the speed climbs. New colors arrive,
+            lanes multiply — and power-ups (shield, slow-mo, magnet,
+            burst) keep the run alive. One miss ends it.
+          </p>
+        </div>
+        <div class="mode" style="--accent:var(--red);--glow:rgba(255,90,90,.45);">
+          <div class="tag">100 Levels</div>
+          <h3>Four worlds, one twist each</h3>
+          <p>
+            One hundred handcrafted stages across four worlds — color
+            steal, a third color, full combo chains. Earn three stars
+            on every stage.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    &copy; <span id="year"></span> Gicklatt &middot;
+    <a href="privacy/">Privacy Policy</a> &middot;
+    <a href="mailto:gicklatt@gmail.com">gicklatt@gmail.com</a>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    var header = document.getElementById("header");
+    var onScroll = function () { header.classList.toggle("scrolled", window.scrollY > 8); };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+  </script>
+</body>
+</html>
