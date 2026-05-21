@@ -93,6 +93,11 @@
       font-size: 14px; font-weight: 600;
       border: 1px solid var(--line); color: var(--faint);
     }
+    a.badge {
+      color: var(--text); border-color: var(--blue);
+      transition: transform .2s ease;
+    }
+    a.badge:hover { transform: translateY(-2px); }
 
     /* screenshots */
     .shots {
@@ -192,7 +197,7 @@
         color, score the match, keep your combo alive.
       </p>
       <div class="badges">
-        <span class="badge">App Store &middot; coming soon</span>
+        <a class="badge" href="https://apps.apple.com/us/app/tixxle/id6768008853" target="_blank" rel="noopener">App Store</a>
         <span class="badge">Google Play &middot; coming soon</span>
       </div>
     </section>
